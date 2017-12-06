@@ -31,14 +31,22 @@
     foreach ( $json as $country )
     {
       // Parse out the relevant language info
-      $langs = array();
+      //$langs = array();
+      $langs = "";
       $languages = $country['languages'];
       foreach ( $languages as $lang )
       {
-        array_push( $langs, $lang['name'] );
+        $langs = $langs . $lang['name'] . "<br>";
+        //array_push( $langs, $lang['name'] );
       }
       $country['languages'] = $langs;
-    
+      
+      // Lets also format the population to be human-readable
+      $country['population'] = number_format( $country['population'] );
+      
+      
+      $country['flag'] = "<img src='" . $country['flag'] . "' width='30%' height='30%'/>";
+      
       // We're combining name and population for sorting
       $arr[ $country['name'] . $country['population'] ] = $country;
     }
@@ -76,10 +84,11 @@
     ksort($subregions);
     
     // Now lets send back the data
-    $returnJSON->count = $count;
-    $returnJSON->data = $countries;
-    $returnJSON->regions = $regions;
-    $returnJSON->subregions = $subregions;
+    $returnJSON = array();
+    $returnJSON['count'] = $count;
+    $returnJSON['data'] = $countries;
+    $returnJSON['regions'] = $regions;
+    $returnJSON['subregions'] = $subregions;
     echo json_encode( $returnJSON );
   }
 ?>

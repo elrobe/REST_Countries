@@ -5,54 +5,53 @@
     <title>Country Search</title>
     <script type="text/javascript" src="jquery-3.2.1.min.js"></script>
     <style>
-    
-      iframe {
-        border: 0px;
-        width: 500px;
-      }
       
       .error {
         color: red;
       }
-    
+      
+      table, th, td {
+        border: 1px solid black;
+        border-collapse: collapse;
+        text-align: center;
+      }
+      
+      th {
+        font-size: 11px;
+      }
+      
     </style>
   </head>
-  <body>   
-    <h1>Country Search</h1>
-    <p>Enter part of a country name.</p>
+  <body>
     
+    <h1>Country Search</h1>
+    <p>Search for countries by name. It can be the native name or partial name.</p>
+    
+    <!-- A simple form for the user input. -->
     <div id="search">
       <form id="form">
-        <!-- Use a table to format it in a nice grid. -->
-        <table>
-          <tbody>
-            <tr>
-              <td>
-                Country: 
-              </td>
-              <td>
-                <input type="text" id="country" name="country"/> 
-              </td>
-              <td>
-                <input type="submit" value="Search"/>
-              </td>
-            </tr>
-            <tr>
-              <td class="error" colspan="3"></td>
-            </tr>
-          </tbody>
-        </table>
+        <text>Country: </text>
+        <input type="text" id="country" name="country"/>
+        <input type="submit" value="Search"/>
       </form>
     </div>
     
-    <div id="results"></div>
+    <!-- This will be a placeholder for the search results. -->
+    <div id="results" visible="false">
+      <!--<p id="error"></p>
+      <table id="1"></p>
+      <p id="2"></p>-->
+    </div>
     
     <script>
+      var columns = ['name', 'population', 'alpha2Code', 'alpha3Code', 'flag', 'region', 'subregion', 'languages'];
+    
       // Make sure the text input is cleared on startup to not carry over values.
       $("#country").val("");
       
       // Prevent the page from reloading then validate the input.
       $("#form").submit(function(event) { 
+        $("#results").html(""); // Make sure the results table is cleared
         event.preventDefault();
         sendQuery();
       })
@@ -71,7 +70,56 @@
       
       function processData( data )
       {
-        $("#results").html(data);
+        var obj = JSON.parse( data );
+        
+        console.log( "Count: " + obj.count );
+        console.log( "Error? " + !(obj.error==null) );
+        
+        if ( obj.error != null )
+        {
+          console.log( "Error found!" );
+          var $error = $( "<h2>", { "class": "error" } );
+          $error.html( obj.error );
+          $("#results").append( $error );
+          return;
+        }
+        
+        var $header = $( "<h2>" );
+        $header.html( obj.count + " countries found:" );
+        
+        var $table = $( "<table>" );
+        var $tbody = $( "<tbody>" );
+        $table.append( $tbody );
+        var $tr = $( "<tr>" );
+        var $th = $( "<th>" );
+        $tr.append( $th ); // Empty header
+        // Create the column headers
+        for ( var i = 0; i < columns.length; i++ )
+        {
+          $th = $( "<th>" );
+          $th.html( columns[i].toUpperCase() );
+          $tr.append( $th );
+        }
+        $tbody.append( $tr );
+        
+        var countries = obj.data;
+        for ( var c = 0; c < countries.length; c++ )
+        {
+          $tr = $( "<tr>" );
+          var $td = $( "<td>" );
+          $td.html( c );
+          $tr.append( $td );
+          for ( var i = 0; i < columns.length; i++ )
+          {
+            $td = $( "<td>" );
+            $td.html( countries[c][ columns[i] ] );
+            $tr.append( $td );
+          }
+          $tbody.append( $tr );
+        }
+        
+        $("#results").append( $header );
+        $("#results").append( $table );
       }
     </script>
   </body>
