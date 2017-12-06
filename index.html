@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>Country Search</title>
+    <script type="text/javascript" src="jquery-3.2.1.min.js"></script>
+    <style>
+    
+      iframe {
+        border: 0px;
+        width: 500px;
+      }
+      
+      .error {
+        color: red;
+      }
+    
+    </style>
+  </head>
+  <body>   
+    <h1>Country Search</h1>
+    <p>Enter part of a country name.</p>
+    
+    <div id="search">
+      <form id="form">
+        <!-- Use a table to format it in a nice grid. -->
+        <table>
+          <tbody>
+            <tr>
+              <td>
+                Country: 
+              </td>
+              <td>
+                <input type="text" id="country" name="country"/> 
+              </td>
+              <td>
+                <input type="submit" value="Search"/>
+              </td>
+            </tr>
+            <tr>
+              <td class="error" colspan="3"></td>
+            </tr>
+          </tbody>
+        </table>
+      </form>
+    </div>
+    
+    <div id="results"></div>
+    
+    <script>
+      // Make sure the text input is cleared on startup to not carry over values.
+      $("#country").val("");
+      
+      // Prevent the page from reloading then validate the input.
+      $("#form").submit(function(event) { 
+        event.preventDefault();
+        sendQuery();
+      })
+      
+      function sendQuery()
+      {
+        $.ajax({
+          type: "post",
+          url: "countries.php",
+          data: $("#form").serialize(),
+          success: function( data ) {
+            processData( data );
+          }
+        });
+      }
+      
+      function processData( data )
+      {
+        $("#results").html(data);
+      }
+    </script>
+  </body>
+</html>
