@@ -80,6 +80,8 @@
       var columns = ['name', 'population', 'alpha2Code', 'alpha3Code', 'flag', 
                      'region', 'subregion', 'languages'];
       
+      var $lastRqst = null; // Maintain a reference to the current AJAX request
+      
       // Save the start state of the results section
       var resultsHTML = $("#results").html();
       
@@ -111,11 +113,15 @@
        */
       function sendQuery()
       {
-        $.ajax({
-          type: "post",
+        $lastRqst = $.ajax({
+          type: "POST",
           url: "php/countries.php",
           data: $("#form").serialize(),
-          success: function( data ) {
+          beforeSend: function() {      // Abort the last request
+            if ( $lastRqst != null )
+              $lastRqst.abort();
+          },
+          success: function( data ) {   // On success...
             processData( data );
           }
         });
@@ -128,8 +134,6 @@
       function processData( data )
       {
         var obj = JSON.parse( data );
-        
-        console.log( obj );
         
         if ( obj.error != null )
         {
