@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<!--
+  File:     index.html
+  Author:   Eli Berg
+  Purpose:  Main page for a web application that takes user input to search
+            the REST Countries API and display it back to the end user.
+            Sends the search query to a PHP file that queries the API, cleans
+            up the data, then sends back to here to be displayed.
+-->
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>Country Search</title>
+    <link rel="stylesheet" type="text/css" href="css/countries.css">
+    <script type="text/javascript" src="js/jquery-3.2.1.min.js"></script>
+  </head>
+  <body>
+    
+    <!-- Header -->
+    <div>
+      <h1>Country Search</h1>
+      <p>Search for countries by name. It can be the native name or partial name.</p>
+    </div>
+    
+    <!-- A simple form for the user input. -->
+    <div id="search">
+      <form id="form">
+        <text>Country: </text>
+        <input type="text" id="input" name="country"/>
+        <input type="submit" value="Search"/>
+      </form>
+    </div>
+    
+    <!-- This will be a placeholder for the search results. -->
+    <div id="results">
+      <center>
+      <p id="error" class="error" hidden="true"></p>
+      <div id="data" hidden="true">
+        <table>
+          <caption>Countries</caption>
+          <tbody id="countries">
+            <tr>
+              <th>Name</th>
+              <th>Population</th>
+              <th>Alpha-2 Code</th>
+              <th>Alpha-3 Code</th>
+              <th>Flag</th>
+              <th>Region</th>
+              <th>Subregions</th>
+              <th>Languages</th>
+            </tr>
+          </tbody>
+        </table>
+        <p id="count"></p>
+        <table>
+          <caption>Regions</caption>
+          <tbody id="regions">
+            <tr>
+              <th>Region</th>
+              <th># of Appearances</th>
+            </tr>
+          </tbody>
+        </table>
+        <table>
+          <caption>Subregions</caption>
+          <tbody id="subregions">
+            <tr>
+              <th>Subregion</th>
+              <th># of Appearances</th>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      </center>
+    </div>
+    
+    <script>
+      // SCRIPT ================================================================
+      // The columns will stay constant
+      var columns = ['name', 'population', 'alpha2Code', 'alpha3Code', 'flag', 
+                     'region', 'subregion', 'languages'];
+      
+      // Save the start state of the results section
+      var resultsHTML = $("#results").html();
+      
+      // Clear out the input to be safe on startup
+      $("#input").val("");
+      
+      // Prevent the page from reloading then validate the input
+      $("#form").submit(function(event) { 
+        resetResults(); // Make sure the results table is cleared
+        event.preventDefault(); // Prevent the page from reloading 
+        sendQuery();
+      });
+      
+      // FUNCTIONS =============================================================
+      
+      /*
+       * Function:  resetResults
+       * Purpose:   Resets the HTML of the results section to it's initial state
+       *            upon each query.
+       */
+      function resetResults()
+      {
+        $("#results").html( resultsHTML );
+      }
+      
+      /*
+       * Function:  sendQuery
+       * Purpose:   Sends the user input to the PHP file with AJAX.
+       */
+      function sendQuery()
+      {
+        $.ajax({
+          type: "post",
+          url: "php/countries.php",
+          data: $("#form").serialize(),
+          success: function( data ) {
+            processData( data );
+          }
+        });
+      }
+      
+      /*
+       * Function:  processData
+       * Purpose:   Entry point to process the data sent back from the PHP file.
+       */
+      function processData( data )
+      {
+        var obj = JSON.parse( data );
+        
+        console.log( obj );
+        
+        if ( obj.error != null )
+        {
+          $("#error").show();
+          $("#error").html( obj.error );
+          return;
+        }
+        
+        $("#data").show();
+        
+        // Countries
+        populateCountries( $("#countries"), obj.data );
+        
+        // Count
+        $("#count").html( "Total countries found: " + obj.data.length );
+        
+        // Regions
+        populateRegion( $("#regions"), obj.regions );
+        
+        // Subregions
+        populateRegion( $("#subregions"), obj.subregions );
+      }
+      
+      /*
+       * Function:  populateCountries
+       * Purpose:   Populates the country table 
+       */
+      function populateCountries( $tableBody, countryData )
+      {
+        for ( var c = 0; c < countryData.length; c++ )
+        {
+          var $tr = $("<tr>");
+          for ( var i = 0; i < columns.length; i++ )
+          {
+            // Create a new cell with the current column's data
+            var $td = $("<td>");
+            $td.html( countryData[c][columns[i]] );
+            $tr.append( $td );
+          }
+          $tableBody.append( $tr );
+        }        
+      }
+      
+      /*
+       * Function:  populateRegion
+       * Purpose:   Populates the region/subregion tables based on the
+       *            JSON data.
+       */
+      function populateRegion( $tableBody, regionData )
+      {
+        // Loop over all of the regions
+        for ( var region in regionData )
+        {
+          // Make sure that 'region' is a key
+          if ( regionData.hasOwnProperty( region ) )
+          {
+            var $tr = $("<tr>");
+            
+            var $td = $("<td>");            // Name
+            $td.html( region );
+            $tr.append( $td );
+            
+            $td = $("<td>");
+            $td.html( regionData[region] ); // Count
+            $tr.append( $td );
+            
+            $tableBody.append( $tr );
+          }
+        }
+      }
+    </script>
+  </body>
+</html>
