@@ -27,9 +27,9 @@ First, clone the repository. Then you can start the program either...
 - with the provided script, or
 - running the ```php``` command youself with the document root set to the ```src/``` folder.
 
-The start.sh script was written to start the PHP server directly from the directory you clone. Some comments are provided in the file to explain how it uses the php command to start the server on your local machine.
+Some comments are provided in the script, ```start.sh``` to explain how it uses the ```php``` command to start the server on your local machine.
 
-So to start it up, use:
+To use the script:
 ```
 sh start.sh
 ```
