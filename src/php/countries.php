@@ -8,14 +8,17 @@
    *           display.
    */
   
+  // SCRIPT ====================================================================
+  
   // Constants
+  $WARNING = false;
   $MAX_RESULTS = 50;
   $api = "https://restcountries.eu/rest/v2/name/";
   $filters = "?fields=name;population;alpha2Code;alpha3Code;flag;region;subregion;languages";
     
   // Process the expected incoming POST request containing a country name
   if ( $_SERVER['REQUEST_METHOD'] == "POST" )
-  {  
+  {
     // Validate the data coming in
     if ( empty($_POST['country']) )
     {
@@ -24,29 +27,31 @@
     }
     
     // Generate the API call with the URL combined with the user input
-    $input = $_POST["country"];
-    $input = filter_var($input, FILTER_SANITIZE_STRING); // Sanitize first!
+    $input = $_POST['country'];
+    $input = filter_var( $input, FILTER_SANITIZE_STRING ); // Sanitize first!
     $apiCall = $api . $input . $filters;
     
-    // Use file_get_contents, thanks to PHP 7, to get the JSON data
+    // Use file_get_contents to query the API, but we also need handling
+    // in case the function doesn't get any data
+    set_error_handler( "warningHandler", E_WARNING ); // redirect a warning
     $response = file_get_contents( $apiCall );
+    restore_error_handler();
     
-    // Return an error message if there's no data
-    if ( empty($response) )
-    {
-      errorMessage("Error loading data; try a different query.");
+    // If we got a warning, then quit (response set by the warning handler)
+    if ( $GLOBALS['WARNING'] )
       return;
-    }
     
     // If we get this far, there's some data to process
     processResults( $response );
     return; // Not needed but ensures we don't process anything else
   }
-  else // This is a sanity check
+  else // Sanity check
   {
     errorMessage("Invalid request type. Try again.");
     return;
   }
+  
+  // FUNCTIONS =================================================================
   
   /*
    * Function:  errorMessage
@@ -60,6 +65,19 @@
   }
   
   /*
+   * Function:  warningHandler
+   * Purpose:   Sets an error message in the response and sets a global variable
+   *            to signal an early response back to the front-end.
+   */
+  function warningHandler( $eNo, $eMsg )
+  {
+    if ( $GLOBALS['WARNING'] ) // Only log one error in case there are several
+      return;
+    $GLOBALS['WARNING'] = true;
+    errorMessage("No results found. Try a different query.");
+  }
+  
+  /*
    * Function:  processResults
    * Purpose:   Process the response from the API call. This assumes the data is
    *            in a JSON format.
@@ -68,15 +86,6 @@
   {
     // This will store the decoded JSON data into $json
     $json = json_decode( $response, true );
-    
-    if ( isset($json['status']) ) // 404 Not Found error
-    {
-      if ( $json['status'] == 404 )
-      {
-        errorMessage("No countries found. Try a different query.");
-        return;
-      }
-    }
     
     // Format the JSON data for output and sort it
     $arr = array();
@@ -134,7 +143,7 @@
       $country['population'] = number_format( $country['population'] );
       
       // Format the flag as an HTML image
-      $country['flag'] = "<img src='" . $country['flag'] . "' width='40%' height='40%'/>";
+      $country['flag'] = "<img src='" . $country['flag'] . "'/>";
       
       // Format the region and subregion if null
       if ( $country['region'] == "" ) $country['region'] = "[None]";

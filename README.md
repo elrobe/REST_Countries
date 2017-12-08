@@ -1,5 +1,5 @@
 # REST_Countries
-An example of a full stack development incorporating HTML, CSS, JavaScript (jQuery and AJAX, and PHP.
+An example of a full stack development incorporating HTML, CSS, JavaScript (jQuery and AJAX), and PHP.
 
 ## Dependencies
 The only dependency for this project is PHP 7. You can install it onto your linux machine with:
@@ -35,7 +35,7 @@ Then, open any web browser on your machine and in the url field, enter "localhos
 ## Structure and Use
 The project currently consists of the following pieces:
 - ```index.html``` is the main web page and entry point.
-- ```css/countries.css``` contains some basic CSS for index.html.
+- ```css/countries.css``` contains some basic CSS for ```index.html```.
 - The ```js/``` folder contains jQuery.
 - ```php/countries.php``` provides the back-end processing of the user input.
 

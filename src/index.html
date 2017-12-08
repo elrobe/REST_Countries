@@ -76,6 +76,7 @@
     
     <script>
       // SCRIPT ================================================================
+      
       // The columns will stay constant
       var columns = ['name', 'population', 'alpha2Code', 'alpha3Code', 'flag', 
                      'region', 'subregion', 'languages'];
@@ -132,7 +133,7 @@
        * Purpose:   Entry point to process the data sent back from the PHP file.
        */
       function processData( data )
-      {
+      {      
         var obj = JSON.parse( data );
         
         if ( obj.error != null )
