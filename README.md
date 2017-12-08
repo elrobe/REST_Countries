@@ -23,12 +23,23 @@ Zend Engine v3.0.0, Copyright (c) 1998-2017 Zend Technologies
 The most important piece is the major version number directly after "PHP" which should be 7 to run this application.
 
 ## Startup
+First, clone the repository. Then you can start the program either...
+- with the provided script, or
+- running the ```php``` command youself with the document root set to the ```src/``` folder.
+
 The start.sh script was written to start the PHP server directly from the directory you clone. Some comments are provided in the file to explain how it uses the php command to start the server on your local machine.
 
 So to start it up, use:
 ```
 sh start.sh
 ```
+
+Or, if you don't have ```bash```, but you have the ```php``` command accessible from your terminal of choice, you can just use the command in the script:
+```
+sudo php -S localhost:80 -t src/
+```
+
+Both the script and the command assume that it's being run from within the cloned ```REST_Countries``` directory.
 
 Then, open any web browser on your machine and in the url field, enter "localhost/". Since it uses port 80, you don't need to enter a port into the url.
 
